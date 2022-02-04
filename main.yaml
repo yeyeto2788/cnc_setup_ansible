@@ -1,0 +1,141 @@
+---
+- name: Install needed packages for CNC work.
+  hosts: 127.0.0.1
+  connection: local
+  vars_files: ./variables.yaml
+
+  pre_tasks:
+    - name: Update packages.
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+      changed_when: false
+      become: yes
+
+  tasks:
+    - name: Execute tasks with escalated privileges
+      block:
+        - name: Install needed packages
+          ansible.builtin.apt:
+            name: "{{ packages_to_install }}"
+            state: present
+
+        - name: Add user to dialout group
+          user:
+            name: "{{ ansible_user }}"
+            shell: /bin/bash
+            groups:
+              - dialout
+            append: yes
+          when: ansible_user != "root"
+
+      become: yes
+
+    - name: Install Candle
+      block:
+        - name: Clone Candle repository
+          ansible.builtin.git:
+            repo: https://github.com/Denvi/Candle.git
+            dest: "/home/{{ ansible_user }}/candle"
+            single_branch: yes
+            version: "{{ candle_repo_branch }}"
+
+        - name: Run qmake
+          ansible.builtin.shell:
+            cmd: qmake
+            chdir: "/home/{{ ansible_user }}/candle/src"
+
+        - name: Run make
+          ansible.builtin.shell:
+            cmd: make
+            chdir: "/home/{{ ansible_user }}/candle/src"
+            creates: "/home/{{ ansible_user }}/candle/src/Candle"
+
+        - name: Add alias for Candle
+          ansible.builtin.lineinfile:
+            path: "/home/{{ ansible_user }}/.bashrc"
+            line: "alias candle='/home/{{ ansible_user }}/candle/src/Candle'"
+            state: present
+
+      when: install_candle == True
+
+    - name: Install Gcode utils tool
+      block:
+        - name: Install Java
+          ansible.builtin.apt:
+            name: default-jre
+            state: present
+          become: true
+
+        - name: Create directory for storing the jar file
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/g-code-utils/"
+            state: directory
+
+        - name: Get JavaFX SDK
+          ansible.builtin.get_url:
+            url: https://download2.gluonhq.com/openjfx/17.0.2/openjfx-17.0.2_linux-x64_bin-sdk.zip
+            dest: "/home/{{ ansible_user }}/g-code-utils/"
+
+        - name: Create directory for storing the JavaFX SDK file
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2"
+            state: directory
+
+        - name: Uncompress JavaFX SDK
+          ansible.builtin.unarchive:
+            src: "/home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2_linux-x64_bin-sdk.zip"
+            dest: "/home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2"
+
+        - name: Get release java file
+          ansible.builtin.get_url:
+            url: "https://github.com/alvarogimenez/g-code-utils/releases/download/v{{ gcode_utils_version}}/g-code-utils-{{ gcode_utils_version }}.jar"
+            dest: "/home/{{ ansible_user }}/g-code-utils/"
+
+        - name: Add alias for Gcode utils tool
+          ansible.builtin.lineinfile:
+            path: "/home/{{ ansible_user }}/.bashrc"
+            line: "alias gcode-utils='java --module-path /home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2/javafx-sdk-17.0.2/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar /home/{{ ansible_user }}/g-code-utils/g-code-utils-{{ gcode_utils_version }}.jar'"
+            state: present
+
+      when: install_gcode_utils
+
+    - name: Install FlatCAM
+      block:
+        - name: Clone FlatCAM project.
+          ansible.builtin.git:
+            repo: https://bitbucket.org/jpcgt/flatcam.git
+            dest: "/home/{{ ansible_user }}/flatcam"
+            # single_branch: yes
+            version: "{{ flatcam_repo_branch }}"
+
+        - name: Install FlatCAM needed packages
+          ansible.builtin.apt:
+            name: "{{ flatcam_packages }}"
+            state: present
+          become: true
+
+        - name: Install FlatCAM Python dependencies.
+          ansible.builtin.pip:
+            requirements: "/home/{{ ansible_user }}/flatcam/requirements.txt"
+
+        - name: Re-Install broken FlatCAM Python dependencies.
+          ansible.builtin.pip:
+            name:
+              - svglib==1.1.0
+              - vispy==0.7.0
+
+        - name: Add alias for FlatCAM
+          ansible.builtin.lineinfile:
+            path: "/home/{{ ansible_user }}/.bashrc"
+            line: "alias flatcam='python3 /home/{{ ansible_user }}/flatcam/FlatCAM.py'"
+            state: present
+
+      when: install_flatcam
+
+  post_tasks:
+    - name: Clean system packages
+      apt:
+        autoclean: true
+        autoremove: true
+      become: yes

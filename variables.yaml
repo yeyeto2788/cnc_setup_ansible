@@ -1,0 +1,40 @@
+# apt packages to install.
+packages_to_install:
+  - g++
+  - libqt5opengl5-dev
+  - qt5-default
+  - qttools5-dev-tools
+  - libqt5serialport5-dev
+
+# CANDLE related configuration
+install_candle: yes
+candle_repo_branch: "grbl_1_1"
+
+# GCode Utils related configuration
+install_gcode_utils: yes
+gcode_utils_version: "1.0.1"
+openjfx_version: "17.0.2"
+
+###########
+# FlatCAM #
+###########
+# Whether install or not FlatCAM
+install_flatcam: yes
+# Branch to use for the installation
+flatcam_repo_branch: "Beta"
+# This packages are coming directly from
+# https://bitbucket.org/jpcgt/flatcam/src/Beta/setup_ubuntu.sh
+flatcam_packages:
+  - libfreetype6
+  - libfreetype6-dev
+  - libgeos-dev
+  - libpng-dev
+  - libspatialindex-dev
+  - qt5-style-plugins
+  - python3-dev
+  - python3-gdal
+  - python3-pip
+  - python3-pyqt5
+  - python3-pyqt5.qtopengl
+  - python3-simplejson
+  - python3-tk
