@@ -3,11 +3,19 @@
 This repository contains an Ansible playbook for installing CNC related tools on Ubuntu 20.04 based systems. Those tools are:
 
 - Candle
-  ![Candle working](./docs/images/candle.png)
 - g-code-utils
-  ![g-code-utils working](./docs/images/gcode_utils.png)
 - FlatCAM
-  ![FlatCAM working](./docs/images/flatcam.png)
+
+---
+
+- [CNC Setup](#cnc-setup)
+  - [Tools / Applications installed](#tools--applications-installed)
+    - [g-code-utils from [alvarogimenez](https://github.com/alvarogimenez)](#g-code-utils-from-alvarogimenez)
+    - [Candle from [Denvi](https://github.com/Denvi)](#candle-from-denvi)
+    - [FlatCAM from [jpcgt]() & [Marius Stanciu]()](#flatcam-from-jpcgt--marius-stanciu)
+  - [Executing this ansible playbook.](#executing-this-ansible-playbook)
+
+---
 
 ## Tools / Applications installed
 
@@ -15,9 +23,18 @@ This repository contains an Ansible playbook for installing CNC related tools on
 
 Used for double side PCB making, this Java application will let you turn the board and align it on your cnc with the already generated Gcode.
 
+![g-code-utils working](./docs/images/gcode_utils.png)
+
+**NOTES**:
+
+- On first spin up we need to set setting to default as when it is built default values are not taken. So in order to do it we need to go to `Service` > `settings` > `Set to defaults` as shown in the picture below.
+  ![reset candle settings](./docs/images/candle_reset_settings.png)
+
 ### [Candle](https://github.com/Denvi/Candle) from [Denvi](https://github.com/Denvi)
 
 Send the Gcode to the board. Similar to the universal Gcode sender.
+
+![Candle working](./docs/images/candle.png)
 
 ### [FlatCAM](http://flatcam.org/) from [jpcgt]() & [Marius Stanciu]()
 
@@ -31,6 +48,7 @@ Gerber to PCB conversion.
   - `svglib` by default does not have any version pinned to it so downgrading to `1.1.0` made it work.
   - Installed packages as per 04/Feb/2022 are listed [here.](./docs/04_02_2022_python3_packages.txt)
 
+![FlatCAM working](./docs/images/flatcam.png)
 
 ## Executing this ansible playbook.
 
