@@ -1,18 +1,30 @@
-# apt packages to install.
+# apt extra packages to install.
 packages_to_install:
+
+
+###########
+# Candle #
+###########
+# Whether install or not Candle
+install_candle: yes
+# Branch to use when setting up Candle.
+candle_repo_branch: "grbl_1_1"
+# Candle dependencies
+candle_packages:
   - g++
   - libqt5opengl5-dev
   - qt5-default
   - qttools5-dev-tools
   - libqt5serialport5-dev
 
-# CANDLE related configuration
-install_candle: yes
-candle_repo_branch: "grbl_1_1"
-
-# GCode Utils related configuration
+################
+# G code utils #
+################
+# Whether install or not g-code-utils
 install_gcode_utils: yes
+# Version of the tool to be used
 gcode_utils_version: "1.0.1"
+# Version used on for JavaFX
 openjfx_version: "17.0.2"
 
 ###########

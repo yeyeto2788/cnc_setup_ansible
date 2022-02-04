@@ -15,7 +15,7 @@
   tasks:
     - name: Execute tasks with escalated privileges
       block:
-        - name: Install needed packages
+        - name: Install extra needed packages
           ansible.builtin.apt:
             name: "{{ packages_to_install }}"
             state: present
@@ -33,6 +33,11 @@
 
     - name: Install Candle
       block:
+        - name: Install Candle needed packages
+          ansible.builtin.apt:
+            name: "{{ candle_packages }}"
+            state: present
+
         - name: Clone Candle repository
           ansible.builtin.git:
             repo: https://github.com/Denvi/Candle.git
