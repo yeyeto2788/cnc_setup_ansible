@@ -10,16 +10,18 @@ This repository contains an Ansible playbook for installing CNC related tools on
 
 - [CNC Setup](#cnc-setup)
   - [Tools / Applications installed](#tools--applications-installed)
-    - [g-code-utils from [alvarogimenez](https://github.com/alvarogimenez)](#g-code-utils-from-alvarogimenez)
-    - [Candle from [Denvi](https://github.com/Denvi)](#candle-from-denvi)
-    - [FlatCAM from [jpcgt]() & [Marius Stanciu]()](#flatcam-from-jpcgt--marius-stanciu)
+    - [g-code-utils](#g-code-utils)
+    - [Candle](#candle)
+    - [FlatCAM](#flatcam)
   - [Executing this ansible playbook.](#executing-this-ansible-playbook)
 
 ---
 
 ## Tools / Applications installed
 
-### [g-code-utils](https://github.com/alvarogimenez/g-code-utils) from [alvarogimenez](https://github.com/alvarogimenez)
+### [g-code-utils](https://github.com/alvarogimenez/g-code-utils)
+
+Application from [alvarogimenez](https://github.com/alvarogimenez).
 
 Used for double side PCB making, this Java application will let you turn the board and align it on your cnc with the already generated Gcode.
 
@@ -30,13 +32,17 @@ Used for double side PCB making, this Java application will let you turn the boa
 - On first spin up we need to set setting to default as when it is built default values are not taken. So in order to do it we need to go to `Service` > `settings` > `Set to defaults` as shown in the picture below.
   ![reset candle settings](./docs/images/candle_reset_settings.png)
 
-### [Candle](https://github.com/Denvi/Candle) from [Denvi](https://github.com/Denvi)
+### [Candle](https://github.com/Denvi/Candle)
+
+Application from [Denvi](https://github.com/Denvi).
 
 Send the Gcode to the board. Similar to the universal Gcode sender.
 
 ![Candle working](./docs/images/candle.png)
 
-### [FlatCAM](http://flatcam.org/) from [jpcgt]() & [Marius Stanciu]()
+### [FlatCAM](http://flatcam.org/)
+
+Application from [jpcgt]() & [Marius Stanciu]().
 
 Gerber to PCB conversion.
 
