@@ -79,18 +79,18 @@
 
         - name: Get JavaFX SDK
           ansible.builtin.get_url:
-            url: https://download2.gluonhq.com/openjfx/17.0.2/openjfx-17.0.2_linux-x64_bin-sdk.zip
+            url: "https://download2.gluonhq.com/openjfx/{{ openjfx_version }}/openjfx-{{ openjfx_version }}_linux-x64_bin-sdk.zip"
             dest: "/home/{{ ansible_user }}/g-code-utils/"
 
         - name: Create directory for storing the JavaFX SDK file
           ansible.builtin.file:
-            path: "/home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2"
+            path: "/home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}"
             state: directory
 
         - name: Uncompress JavaFX SDK
           ansible.builtin.unarchive:
-            src: "/home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2_linux-x64_bin-sdk.zip"
-            dest: "/home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2"
+            src: "/home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}_linux-x64_bin-sdk.zip"
+            dest: "/home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}"
 
         - name: Get release java file
           ansible.builtin.get_url:
@@ -100,7 +100,7 @@
         - name: Add alias for Gcode utils tool
           ansible.builtin.lineinfile:
             path: "/home/{{ ansible_user }}/.bashrc"
-            line: "alias gcode-utils='java --module-path /home/{{ ansible_user }}/g-code-utils/openjfx-17.0.2/javafx-sdk-17.0.2/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar /home/{{ ansible_user }}/g-code-utils/g-code-utils-{{ gcode_utils_version }}.jar'"
+            line: "alias gcode-utils='java --module-path /home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}/javafx-sdk-{{ openjfx_version }}/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar /home/{{ ansible_user }}/g-code-utils/g-code-utils-{{ gcode_utils_version }}.jar'"
             state: present
 
       when: install_gcode_utils
