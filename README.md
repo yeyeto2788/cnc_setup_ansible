@@ -49,6 +49,8 @@ Application from [jpcgt]() & [Marius Stanciu]().
 
 Gerber to PCB conversion.
 
+![FlatCAM working](./docs/images/flatcam.png)
+
 **NOTES:**
 
 - I had to switch to the `Beta` branch as `master` was somehow not working on 20.04 Ubuntu based systems, seems to be using old libraries and still pointing to the dead Python 2.7
@@ -56,8 +58,6 @@ Gerber to PCB conversion.
   - `vispy` which I had to downgrade to `0.7.0`
   - `svglib` by default does not have any version pinned to it so downgrading to `1.1.0` made it work.
   - Installed packages as per 04/Feb/2022 are listed [here.](./docs/04_02_2022_python3_packages.txt)
-
-![FlatCAM working](./docs/images/flatcam.png)
 
 ## Executing this ansible playbook.
 
