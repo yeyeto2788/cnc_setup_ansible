@@ -51,5 +51,5 @@ Gerber to PCB conversion.
   ```shell
   git clone https://github.com/yeyeto2788/cnc_setup.git
   cd cnc_setup
-  ansible-playbook main.yaml -K
+  ansible-playbook main.yaml -K -u $USER
   ```
