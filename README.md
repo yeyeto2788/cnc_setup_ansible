@@ -28,9 +28,7 @@ Used for double side PCB making, this Java application will let you turn the boa
 ![g-code-utils working](./docs/images/gcode_utils.png)
 
 **NOTES**:
-
-- On first spin up we need to set setting to default as when it is built default values are not taken. So in order to do it we need to go to `Service` > `settings` > `Set to defaults` as shown in the picture below.
-  ![reset candle settings](./docs/images/candle_reset_settings.png)
+* In ubuntu 20.04 systems the OpenJDK does not come with JavaFX installed anymore which is needed to execute the application. So there is a need to install it and it is done automatically for us with this tool/script.
 
 ### [Candle](https://github.com/Denvi/Candle)
 
@@ -39,6 +37,11 @@ Application from [Denvi](https://github.com/Denvi).
 Send the Gcode to the board. Similar to the universal Gcode sender.
 
 ![Candle working](./docs/images/candle.png)
+
+**NOTES**:
+
+- On first spin up we need to set setting to default as when it is built default values are not taken. So in order to do it we need to go to `Service` > `settings` > `Set to defaults` as shown in the picture below.
+  ![reset candle settings](./docs/images/candle_reset_settings.png)
 
 ### [FlatCAM](http://flatcam.org/)
 
