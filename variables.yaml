@@ -24,6 +24,9 @@ candle_packages:
 install_gcode_utils: yes
 # Version of the tool to be used
 gcode_utils_version: "1.0.1"
+# Architecture to be use for downloading the openjfx binaries
+# Possible values are: aarch64, arm32, x86, x64
+openjfx_architecture: "x64"
 # Version used on for JavaFX
 openjfx_version: "17.0.2"
 

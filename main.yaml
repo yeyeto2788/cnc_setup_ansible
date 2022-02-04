@@ -79,7 +79,7 @@
 
         - name: Get JavaFX SDK
           ansible.builtin.get_url:
-            url: "https://download2.gluonhq.com/openjfx/{{ openjfx_version }}/openjfx-{{ openjfx_version }}_linux-x64_bin-sdk.zip"
+            url: "https://download2.gluonhq.com/openjfx/{{ openjfx_version }}/openjfx-{{ openjfx_version }}_linux-{{ openjfx_architecture }}_bin-sdk.zip"
             dest: "/home/{{ ansible_user }}/g-code-utils/"
 
         - name: Create directory for storing the JavaFX SDK file
@@ -89,7 +89,7 @@
 
         - name: Uncompress JavaFX SDK
           ansible.builtin.unarchive:
-            src: "/home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}_linux-x64_bin-sdk.zip"
+            src: "/home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}_linux-{{ openjfx_architecture }}_bin-sdk.zip"
             dest: "/home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}"
 
         - name: Get release java file
