@@ -13,6 +13,9 @@ This repository contains an Ansible playbook for installing CNC related tools on
     - [g-code-utils](#g-code-utils)
     - [Candle](#candle)
     - [FlatCAM](#flatcam)
+    - [Universal Gcode Sender](#universal-gcode-sender)
+      - [UGS platform](#ugs-platform)
+      - [UGS classic](#ugs-classic)
   - [Executing this ansible playbook.](#executing-this-ansible-playbook)
 
 ---
@@ -28,7 +31,8 @@ Used for double side PCB making, this Java application will let you turn the boa
 ![g-code-utils working](./docs/images/gcode_utils.png)
 
 **NOTES**:
-* In ubuntu 20.04 systems the OpenJDK does not come with JavaFX installed anymore which is needed to execute the application. So there is a need to install it and it is done automatically for us with this tool/script.
+
+- In ubuntu 20.04 systems the OpenJDK does not come with JavaFX installed anymore which is needed to execute the application. So there is a need to install it and it is done automatically for us with this tool/script.
 
 ### [Candle](https://github.com/Denvi/Candle)
 
@@ -58,6 +62,22 @@ Gerber to PCB conversion.
   - `vispy` which I had to downgrade to `0.7.0`
   - `svglib` by default does not have any version pinned to it so downgrading to `1.1.0` made it work.
   - Installed packages as per 04/Feb/2022 are listed [here.](./docs/04_02_2022_python3_packages.txt)
+
+### [Universal Gcode Sender](https://github.com/winder/Universal-G-Code-Sender)
+
+Application from [winder](https://github.com/winder)
+
+Send gcode to controller boards, similar to Candle.
+
+It comes in two versions (`classic` which should be lightweight and `platform` which is the most updated one)
+
+#### UGS platform
+
+![UGS platform](./docs/images/ugs_platform.png)
+
+#### UGS classic
+
+![UGS classic](./docs/images/ugs_classic.png)
 
 ## Executing this ansible playbook.
 

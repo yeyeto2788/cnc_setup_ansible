@@ -1,6 +1,7 @@
 # apt extra packages to install.
 packages_to_install:
-
+  - nano
+  - git
 
 ###########
 # Candle #
@@ -53,3 +54,13 @@ flatcam_packages:
   - python3-pyqt5.qtopengl
   - python3-simplejson
   - python3-tk
+
+##########################
+# Universal Gcode Sender #
+##########################
+# Whether install or not
+install_ugs: yes
+# Version to download
+ugs_version: "2.0.9"
+# UGS type (classic, platform)
+ugs_type: platform

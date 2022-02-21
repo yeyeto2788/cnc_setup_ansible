@@ -138,6 +138,61 @@
 
       when: install_flatcam
 
+    - name: Install Universal Gcode Sender Platform
+      block:
+        - name: Create directory for storing UGS files
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/ugsplatform"
+            state: directory
+
+        - name: Download the UGS package
+          ansible.builtin.get_url:
+            url: "https://ugs.jfrog.io/ui/api/v1/download?repoKey=UGS&path=v{{ugs_version}}%252Fugs-platform-app-linux.tar.gz&isNativeBrowsing=false"
+            dest: "/home/{{ ansible_user }}/ugsplatform"
+
+        - name: Uncompress UGS platform
+          ansible.builtin.unarchive:
+            src: "/home/{{ ansible_user }}/ugsplatform/ugs-platform-app-linux.tar.gz"
+            dest: "/home/{{ ansible_user }}/ugsplatform/"
+
+        - name: Add alias for UGS
+          ansible.builtin.lineinfile:
+            path: "/home/{{ ansible_user }}/.bashrc"
+            line: "alias ugs='/home/{{ ansible_user }}/ugsplatform/ugsplatform-linux/bin/ugsplatform'"
+            state: present
+
+      when: install_ugs and ugs_type == "platform"
+
+    - name: Install Universal Gcode Sender Classic
+      block:
+        - name: Create directory for storing UGS files
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/ugsplatform"
+            state: directory
+
+        - name: Download the UGS package
+          ansible.builtin.get_url:
+            url: "https://ugs.jfrog.io/ui/api/v1/download?repoKey=UGS&path=v{{ugs_version}}%252FUniversalGcodeSender.zip&isNativeBrowsing=false"
+            dest: "/home/{{ ansible_user }}/ugsplatform"
+
+        - name: Uncompress UGS platform
+          ansible.builtin.unarchive:
+            src: "/home/{{ ansible_user }}/ugsplatform/UniversalGcodeSender.zip"
+            dest: "/home/{{ ansible_user }}/ugsplatform/"
+
+        - name: Make entrypoint file executable.
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/ugsplatform/UniversalGcodeSender/start.sh"
+            mode: "0755"
+
+        - name: Add alias for UGS
+          ansible.builtin.lineinfile:
+            path: "/home/{{ ansible_user }}/.bashrc"
+            line: "alias ugs='/home/{{ ansible_user }}/ugsplatform/UniversalGcodeSender/start.sh'"
+            state: present
+
+      when: install_ugs and ugs_type == "classic"
+
   post_tasks:
     - name: Clean system packages
       apt:
