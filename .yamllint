@@ -1,0 +1,14 @@
+---
+# yamllint config tuned for Ansible content. ansible-ci runs `yamllint
+# --strict`, so warnings fail too; these rules reflect common Ansible practice
+# rather than yamllint's unrealistic 80-column / strict-truthy defaults.
+extends: default
+
+rules:
+  # Ansible tasks (shell commands, long module args) routinely exceed 80 cols.
+  line-length: disable
+  # Ansible idiomatically uses yes/no as booleans.
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+  # Playbook/vars files here don't all carry an explicit document start.
+  document-start: disable

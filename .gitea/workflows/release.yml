@@ -1,0 +1,9 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    uses: yeyeto2788/ci-workflows/.gitea/workflows/release.yml@v1.0

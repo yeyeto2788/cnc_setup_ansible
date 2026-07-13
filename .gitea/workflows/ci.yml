@@ -1,0 +1,10 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    uses: yeyeto2788/ci-workflows/.gitea/workflows/ansible-ci.yml@v1.0
