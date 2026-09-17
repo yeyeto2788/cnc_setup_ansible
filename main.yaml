@@ -37,29 +37,34 @@
           ansible.builtin.apt:
             name: "{{ candle_packages }}"
             state: present
+          become: true
 
         - name: Clone Candle repository
           ansible.builtin.git:
             repo: https://github.com/Denvi/Candle.git
             dest: "/home/{{ ansible_user }}/candle"
             single_branch: yes
-            version: "{{ candle_repo_branch }}"
+            version: "{{ candle_version }}"
 
-        - name: Run qmake
+        - name: Configure Candle build with CMake
           ansible.builtin.shell:
-            cmd: qmake
-            chdir: "/home/{{ ansible_user }}/candle/src"
+            cmd: >
+              cmake -B build
+              -DCMAKE_INSTALL_PREFIX=/home/{{ ansible_user }}/candle/install
+              -DCMAKE_BUILD_TYPE=Release
+            chdir: "/home/{{ ansible_user }}/candle"
+            creates: "/home/{{ ansible_user }}/candle/build/CMakeCache.txt"
 
-        - name: Run make
+        - name: Build and install Candle
           ansible.builtin.shell:
-            cmd: make
-            chdir: "/home/{{ ansible_user }}/candle/src"
-            creates: "/home/{{ ansible_user }}/candle/src/Candle"
+            cmd: cmake --build build --config Release --parallel "{{ ansible_processor_vcpus | default(2) }}" && cmake --install build --config Release
+            chdir: "/home/{{ ansible_user }}/candle"
+            creates: "/home/{{ ansible_user }}/candle/install/candle"
 
         - name: Add alias for Candle
           ansible.builtin.lineinfile:
             path: "/home/{{ ansible_user }}/.bashrc"
-            line: "alias candle='/home/{{ ansible_user }}/candle/src/Candle'"
+            line: "alias candle='/home/{{ ansible_user }}/candle/install/candle'"
             state: present
 
       when: install_candle == True
@@ -94,24 +99,23 @@
 
         - name: Get release java file
           ansible.builtin.get_url:
-            url: "https://github.com/alvarogimenez/g-code-utils/releases/download/v{{ gcode_utils_version}}/g-code-utils-{{ gcode_utils_version }}.jar"
+            url: "https://github.com/alvarogimenez/g-code-utils/releases/download/v{{ gcode_utils_version}}/g-code-utils-assembly-{{ gcode_utils_version }}.jar"
             dest: "/home/{{ ansible_user }}/g-code-utils/"
 
         - name: Add alias for Gcode utils tool
           ansible.builtin.lineinfile:
             path: "/home/{{ ansible_user }}/.bashrc"
-            line: "alias gcode-utils='java --module-path /home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}/javafx-sdk-{{ openjfx_version }}/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar /home/{{ ansible_user }}/g-code-utils/g-code-utils-{{ gcode_utils_version }}.jar'"
+            line: "alias gcode-utils='java --module-path /home/{{ ansible_user }}/g-code-utils/openjfx-{{ openjfx_version }}/javafx-sdk-{{ openjfx_version }}/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar /home/{{ ansible_user }}/g-code-utils/g-code-utils-assembly-{{ gcode_utils_version }}.jar'"
             state: present
 
       when: install_gcode_utils
 
     - name: Install FlatCAM
       block:
-        - name: Clone FlatCAM project.
+        - name: Clone FlatCAM Evo project.
           ansible.builtin.git:
-            repo: https://bitbucket.org/jpcgt/flatcam.git
+            repo: https://bitbucket.org/marius_stanciu/flatcam_beta.git
             dest: "/home/{{ ansible_user }}/flatcam"
-            # single_branch: yes
             version: "{{ flatcam_repo_branch }}"
 
         - name: Install FlatCAM needed packages
@@ -122,13 +126,8 @@
 
         - name: Install FlatCAM Python dependencies.
           ansible.builtin.pip:
-            requirements: "/home/{{ ansible_user }}/flatcam/requirements.txt"
-
-        - name: Re-Install broken FlatCAM Python dependencies.
-          ansible.builtin.pip:
-            name:
-              - svglib==1.1.0
-              - vispy==0.7.0
+            name: "{{ flatcam_pip_packages }}"
+            extra_args: --upgrade
 
         - name: Add alias for FlatCAM
           ansible.builtin.lineinfile:
@@ -138,60 +137,88 @@
 
       when: install_flatcam
 
-    - name: Install Universal Gcode Sender Platform
+    - name: Install Universal Gcode Sender
       block:
-        - name: Create directory for storing UGS files
+        - name: Download the UGS Debian package
+          ansible.builtin.get_url:
+            url: "https://github.com/winder/Universal-G-Code-Sender/releases/download/v{{ ugs_version }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.deb"
+            dest: "/home/{{ ansible_user }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.deb"
+
+        - name: Install the UGS Debian package
+          ansible.builtin.apt:
+            deb: "/home/{{ ansible_user }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.deb"
+          become: true
+
+      when: install_ugs
+
+    - name: Install F-Engrave
+      block:
+        - name: Install F-Engrave needed packages
+          ansible.builtin.apt:
+            name: "{{ fengrave_packages }}"
+            state: present
+          become: true
+
+        - name: Install F-Engrave Python dependencies
+          ansible.builtin.pip:
+            name: "{{ fengrave_pip_packages }}"
+
+        - name: Create directory for storing F-Engrave files
           ansible.builtin.file:
-            path: "/home/{{ ansible_user }}/ugsplatform"
+            path: "/home/{{ ansible_user }}/fengrave"
             state: directory
 
-        - name: Download the UGS package
+        - name: Download F-Engrave source package
           ansible.builtin.get_url:
-            url: "https://ugs.jfrog.io/ui/api/v1/download?repoKey=UGS&path=v{{ugs_version}}%252Fugs-platform-app-linux.tar.gz&isNativeBrowsing=false"
-            dest: "/home/{{ ansible_user }}/ugsplatform"
+            url: "https://www.scorchworks.com/Fengrave/F-Engrave-{{ fengrave_version }}_src.zip"
+            dest: "/home/{{ ansible_user }}/fengrave/F-Engrave-{{ fengrave_version }}_src.zip"
 
-        - name: Uncompress UGS platform
+        - name: Uncompress F-Engrave source package
           ansible.builtin.unarchive:
-            src: "/home/{{ ansible_user }}/ugsplatform/ugs-platform-app-linux.tar.gz"
-            dest: "/home/{{ ansible_user }}/ugsplatform/"
+            src: "/home/{{ ansible_user }}/fengrave/F-Engrave-{{ fengrave_version }}_src.zip"
+            dest: "/home/{{ ansible_user }}/fengrave/"
 
-        - name: Add alias for UGS
+        - name: Build and install ttf2cxf_stream for TTF font support
+          ansible.builtin.shell:
+            cmd: make install
+            chdir: "/home/{{ ansible_user }}/fengrave/F-Engrave-{{ fengrave_version }}_src/TTF2CXF_STREAM"
+            creates: /usr/local/bin/ttf2cxf_stream
+          become: true
+
+        - name: Add alias for F-Engrave
           ansible.builtin.lineinfile:
             path: "/home/{{ ansible_user }}/.bashrc"
-            line: "alias ugs='/home/{{ ansible_user }}/ugsplatform/ugsplatform-linux/bin/ugsplatform'"
+            line: "alias fengrave='python3 /home/{{ ansible_user }}/fengrave/F-Engrave-{{ fengrave_version }}_src/f-engrave.py'"
             state: present
 
-      when: install_ugs and ugs_type == "platform"
+      when: install_fengrave
 
-    - name: Install Universal Gcode Sender Classic
+    - name: Install Kiri:Moto
       block:
-        - name: Create directory for storing UGS files
+        - name: Install Kiri:Moto needed packages
+          ansible.builtin.apt:
+            name: libfuse2
+            state: present
+          become: true
+
+        - name: Create directory for storing Kiri:Moto files
           ansible.builtin.file:
-            path: "/home/{{ ansible_user }}/ugsplatform"
+            path: "/home/{{ ansible_user }}/kirimoto"
             state: directory
 
-        - name: Download the UGS package
+        - name: Download Kiri:Moto AppImage
           ansible.builtin.get_url:
-            url: "https://ugs.jfrog.io/ui/api/v1/download?repoKey=UGS&path=v{{ugs_version}}%252FUniversalGcodeSender.zip&isNativeBrowsing=false"
-            dest: "/home/{{ ansible_user }}/ugsplatform"
-
-        - name: Uncompress UGS platform
-          ansible.builtin.unarchive:
-            src: "/home/{{ ansible_user }}/ugsplatform/UniversalGcodeSender.zip"
-            dest: "/home/{{ ansible_user }}/ugsplatform/"
-
-        - name: Make entrypoint file executable.
-          ansible.builtin.file:
-            path: "/home/{{ ansible_user }}/ugsplatform/UniversalGcodeSender/start.sh"
+            url: "https://github.com/GridSpace/grid-apps/releases/download/{{ kirimoto_version }}/KiriMoto-linux-x86_64.AppImage"
+            dest: "/home/{{ ansible_user }}/kirimoto/KiriMoto-linux-x86_64.AppImage"
             mode: "0755"
 
-        - name: Add alias for UGS
+        - name: Add alias for Kiri:Moto
           ansible.builtin.lineinfile:
             path: "/home/{{ ansible_user }}/.bashrc"
-            line: "alias ugs='/home/{{ ansible_user }}/ugsplatform/UniversalGcodeSender/start.sh'"
+            line: "alias kirimoto='/home/{{ ansible_user }}/kirimoto/KiriMoto-linux-x86_64.AppImage --no-sandbox'"
             state: present
 
-      when: install_ugs and ugs_type == "classic"
+      when: install_kirimoto
 
   post_tasks:
     - name: Clean system packages
