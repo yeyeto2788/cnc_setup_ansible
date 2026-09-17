@@ -1,6 +1,8 @@
 # CNC Setup
 
-This repository contains an Ansible playbook for installing CNC related tools on Debian 12 (bookworm) / Ubuntu 22.04 LTS or newer based systems (x86_64 or aarch64, e.g. Raspberry Pi OS).
+This repository contains an Ansible playbook for installing CNC related tools on Debian 12 (bookworm) / Ubuntu 22.04 LTS or newer based systems (x86_64 or aarch64, e.g. Raspberry Pi OS), or on Fedora (latest two releases).
+
+Fedora support is newer and its package mappings are best-effort (derived from Fedora's package repositories rather than tested on real hardware) — see the per-tool notes below for known gaps.
 
 **Recommended minimum:** 8 GB RAM. No individual tool here publishes an official spec for the whole stack — this figure comes from Kiri:Moto's own guidance, since it's the heaviest single component (all slicing runs client-side in its bundled Chromium/Electron process). The rest of the toolset (Candle, FlatCAM, UGS, g-code-utils, F-Engrave) is comfortable with far less; see [Minimum requirements](#minimum-requirements) for the per-tool breakdown.
 
@@ -58,6 +60,7 @@ Send the Gcode to the board. Similar to the universal Gcode sender.
 - The current build also links against `qtwebengine5-dev` (bundles a Chromium engine), which is a noticeably larger download/build than the old Qt Widgets-only version — expect it to take longer and use more disk space.
 - On first spin up we need to set setting to default as when it is built default values are not taken. So in order to do it we need to go to `Service` > `settings` > `Set to defaults` as shown in the picture below.
   ![reset candle settings](./docs/images/candle_reset_settings.png)
+- **Fedora:** builds against the equivalent `qt5-qt*-devel` packages instead of the Debian/Ubuntu `qt*5-dev` ones (see `candle_packages_fedora` in `variables.yaml`); `qtchooser` has no Fedora equivalent needed since the qt5 `qmake` binary is unambiguous there.
 
 ### [FlatCAM](http://flatcam.org/)
 
@@ -72,6 +75,7 @@ Gerber to PCB conversion.
 - The original `jpcgt/flatcam` repository is unmaintained (its own docs still target the dead Python 2.7), so this playbook now clones the actively maintained **FlatCAM Evo** fork instead, from `bitbucket.org/marius_stanciu/flatcam_beta` (still the `Beta` branch).
 - FlatCAM Evo requires **Python 3.6+ and PyQt6** (the original used PyQt5); packages and pip dependencies were updated to match its own `setup_ubuntu.sh`.
 - Historical note (no longer needed with Evo): earlier versions required pinning `vispy==0.7.0` and `svglib==1.1.0` to work around broken releases; installed packages as per 04/Feb/2022 are listed [here](./docs/04_02_2022_python3_packages.txt) for reference.
+- **Fedora:** upstream only ships `setup_ubuntu.sh`, so `flatcam_packages_fedora` in `variables.yaml` is a manually derived, unverified mapping. `qt5-style-plugins` (cosmetic GTK/Qt theme integration on Debian/Ubuntu) has no clean Fedora equivalent and is simply skipped there.
 
 ### [Universal Gcode Sender](https://github.com/winder/Universal-G-Code-Sender)
 
@@ -83,8 +87,8 @@ Send gcode to controller boards, similar to Candle.
 
 **NOTES:**
 
-- As of the 2.1.x releases, UGS publishes a self-contained `.deb` package (bundling its own JRE — it only depends on `libc6`) instead of a tar.gz fetched from a JFrog Artifactory instance, and the old lightweight "classic" build is no longer published. This playbook now downloads and installs that `.deb` directly with `apt`.
-- The `.deb` is architecture-specific (`x64`/`aarch64`); the playbook picks the right one from `ansible_architecture` via the `ugs_arch_map` variable.
+- As of the 2.1.x releases, UGS publishes self-contained, arch-specific `.deb`/`.rpm` packages (bundling their own JRE — they only depend on `libc6`) instead of a tar.gz fetched from a JFrog Artifactory instance, and the old lightweight "classic" build is no longer published. This playbook downloads and installs the `.deb` with `apt` on Debian/Ubuntu, and the native `.rpm` with `dnf` on Fedora.
+- Both packages are architecture-specific (`x64`/`aarch64`); the playbook picks the right one from `ansible_architecture` via the `ugs_arch_map` variable.
 
 ### [F-Engrave](https://www.scorchworks.com/Fengrave/fengrave.html)
 
@@ -108,6 +112,7 @@ Slicer for 3D printing, CAM and laser cutting, downloaded here as the Linux AppI
 
 - Requires `libfuse2` to run the AppImage, which is installed automatically. On **Ubuntu 24.04** this package was renamed to `libfuse2t64`; if you're on 24.04 override `kirimoto` packaging in `variables.yaml` accordingly (do **not** `apt install fuse`, which can remove `fuse3` and break the system).
 - Launched with the `--no-sandbox` flag as required for AppImages run as root/via sudo-less Electron on some distros.
+- **Fedora:** installs `fuse-libs` for FUSE2 support. **Fedora 44 dropped FUSE2 entirely**, so the AppImage may fail to launch there even with `fuse-libs` installed; if so, extract it manually with `./KiriMoto-linux-x86_64.AppImage --appimage-extract` and run the extracted `AppRun` binary instead.
 
 ## Minimum requirements
 

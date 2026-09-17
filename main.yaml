@@ -5,18 +5,26 @@
   vars_files: ./variables.yaml
 
   pre_tasks:
-    - name: Update packages.
+    - name: Update packages (Debian/Ubuntu).
       apt:
         update_cache: true
         cache_valid_time: 3600
       changed_when: false
       become: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update packages (Fedora).
+      ansible.builtin.dnf:
+        update_cache: true
+      changed_when: false
+      become: yes
+      when: ansible_os_family == "RedHat"
 
   tasks:
     - name: Execute tasks with escalated privileges
       block:
         - name: Install extra needed packages
-          ansible.builtin.apt:
+          ansible.builtin.package:
             name: "{{ packages_to_install }}"
             state: present
 
@@ -33,11 +41,19 @@
 
     - name: Install Candle
       block:
-        - name: Install Candle needed packages
+        - name: Install Candle needed packages (Debian/Ubuntu)
           ansible.builtin.apt:
             name: "{{ candle_packages }}"
             state: present
           become: true
+          when: ansible_os_family == "Debian"
+
+        - name: Install Candle needed packages (Fedora)
+          ansible.builtin.dnf:
+            name: "{{ candle_packages_fedora }}"
+            state: present
+          become: true
+          when: ansible_os_family == "RedHat"
 
         - name: Clone Candle repository
           ansible.builtin.git:
@@ -71,11 +87,19 @@
 
     - name: Install Gcode utils tool
       block:
-        - name: Install Java
+        - name: Install Java (Debian/Ubuntu)
           ansible.builtin.apt:
             name: default-jre
             state: present
           become: true
+          when: ansible_os_family == "Debian"
+
+        - name: Install Java (Fedora)
+          ansible.builtin.dnf:
+            name: "{{ gcode_utils_java_package_fedora }}"
+            state: present
+          become: true
+          when: ansible_os_family == "RedHat"
 
         - name: Create directory for storing the jar file
           ansible.builtin.file:
@@ -118,11 +142,19 @@
             dest: "/home/{{ ansible_user }}/flatcam"
             version: "{{ flatcam_repo_branch }}"
 
-        - name: Install FlatCAM needed packages
+        - name: Install FlatCAM needed packages (Debian/Ubuntu)
           ansible.builtin.apt:
             name: "{{ flatcam_packages }}"
             state: present
           become: true
+          when: ansible_os_family == "Debian"
+
+        - name: Install FlatCAM needed packages (Fedora)
+          ansible.builtin.dnf:
+            name: "{{ flatcam_packages_fedora }}"
+            state: present
+          become: true
+          when: ansible_os_family == "RedHat"
 
         - name: Install FlatCAM Python dependencies.
           ansible.builtin.pip:
@@ -143,21 +175,45 @@
           ansible.builtin.get_url:
             url: "https://github.com/winder/Universal-G-Code-Sender/releases/download/v{{ ugs_version }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.deb"
             dest: "/home/{{ ansible_user }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.deb"
+          when: ansible_os_family == "Debian"
 
         - name: Install the UGS Debian package
           ansible.builtin.apt:
             deb: "/home/{{ ansible_user }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.deb"
           become: true
+          when: ansible_os_family == "Debian"
+
+        - name: Download the UGS RPM package
+          ansible.builtin.get_url:
+            url: "https://github.com/winder/Universal-G-Code-Sender/releases/download/v{{ ugs_version }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.rpm"
+            dest: "/home/{{ ansible_user }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.rpm"
+          when: ansible_os_family == "RedHat"
+
+        - name: Install the UGS RPM package
+          ansible.builtin.dnf:
+            name: "/home/{{ ansible_user }}/ugs-{{ ugs_version }}-{{ ugs_arch_map[ansible_architecture] }}.rpm"
+            state: present
+            disable_gpg_check: true
+          become: true
+          when: ansible_os_family == "RedHat"
 
       when: install_ugs
 
     - name: Install F-Engrave
       block:
-        - name: Install F-Engrave needed packages
+        - name: Install F-Engrave needed packages (Debian/Ubuntu)
           ansible.builtin.apt:
             name: "{{ fengrave_packages }}"
             state: present
           become: true
+          when: ansible_os_family == "Debian"
+
+        - name: Install F-Engrave needed packages (Fedora)
+          ansible.builtin.dnf:
+            name: "{{ fengrave_packages_fedora }}"
+            state: present
+          become: true
+          when: ansible_os_family == "RedHat"
 
         - name: Install F-Engrave Python dependencies
           ansible.builtin.pip:
@@ -195,11 +251,19 @@
 
     - name: Install Kiri:Moto
       block:
-        - name: Install Kiri:Moto needed packages
+        - name: Install Kiri:Moto needed packages (Debian/Ubuntu)
           ansible.builtin.apt:
             name: libfuse2
             state: present
           become: true
+          when: ansible_os_family == "Debian"
+
+        - name: Install Kiri:Moto needed packages (Fedora)
+          ansible.builtin.dnf:
+            name: "{{ kirimoto_packages_fedora }}"
+            state: present
+          become: true
+          when: ansible_os_family == "RedHat"
 
         - name: Create directory for storing Kiri:Moto files
           ansible.builtin.file:
@@ -221,8 +285,15 @@
       when: install_kirimoto
 
   post_tasks:
-    - name: Clean system packages
+    - name: Clean system packages (Debian/Ubuntu)
       apt:
         autoclean: true
         autoremove: true
       become: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Clean system packages (Fedora)
+      ansible.builtin.dnf:
+        autoremove: true
+      become: yes
+      when: ansible_os_family == "RedHat"
