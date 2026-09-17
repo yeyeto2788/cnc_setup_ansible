@@ -27,6 +27,21 @@ candle_packages:
   - qtwebengine5-dev
   - libqt5websockets5-dev
   - libqt5serialport5-dev
+# Fedora equivalents of candle_packages above. Best-effort mapping derived
+# from packages.fedoraproject.org, not verified on real Fedora hardware.
+# qtchooser has no Fedora equivalent needed since the qt5 qmake binary is
+# unambiguous there.
+candle_packages_fedora:
+  - cmake
+  - gcc-c++
+  - make
+  - qt5-qtbase-devel
+  - qt5-qttools-devel
+  - qt5-qtscript-devel
+  - qt5-qtmultimedia-devel
+  - qt5-qtwebengine-devel
+  - qt5-qtwebsockets-devel
+  - qt5-qtserialport-devel
 
 ################
 # G code utils #
@@ -41,6 +56,9 @@ gcode_utils_version: "1.2.1"
 openjfx_architecture: "x64"
 # Version used on for JavaFX (latest 17 LTS patch)
 openjfx_version: "17.0.18"
+# JRE package name on Fedora (Debian/Ubuntu use the "default-jre" metapackage
+# directly in main.yaml; Fedora has no equivalent metapackage)
+gcode_utils_java_package_fedora: "java-17-openjdk"
 
 ###########
 # FlatCAM #
@@ -68,6 +86,24 @@ flatcam_packages:
   - python3-pyqt6.qtopengl
   - python3-simplejson
   - python3-tk
+# Fedora equivalents of flatcam_packages above. Best-effort mapping - FlatCAM
+# Evo upstream only ships setup_ubuntu.sh, no Fedora dependency list exists to
+# cross-check against, so this is derived manually from
+# packages.fedoraproject.org and not verified on real hardware. qt5-style-plugins
+# (cosmetic GTK/Qt theming) has no clean Fedora equivalent and is dropped.
+flatcam_packages_fedora:
+  - freetype
+  - freetype-devel
+  - geos-devel
+  - libpng-devel
+  - spatialindex-devel
+  - python3-devel
+  - python3-gdal
+  - python3-pip
+  - python3-pyqt6
+  - python3-pyqt6-base
+  - python3-simplejson
+  - python3-tkinter
 # Python (pip) dependencies, also from setup_ubuntu.sh above
 flatcam_pip_packages:
   - numpy
@@ -111,6 +147,7 @@ install_ugs: yes
 # See https://github.com/winder/Universal-G-Code-Sender/releases
 ugs_version: "2.1.26"
 # Maps ansible_architecture to the arch suffix used in UGS release filenames
+# (shared by both the .deb and .rpm release assets, e.g. ugs-2.1.26-x64.rpm)
 ugs_arch_map:
   x86_64: x64
   aarch64: aarch64
@@ -129,6 +166,13 @@ fengrave_packages:
   - g++
   - libfreetype6-dev
   - potrace
+# Fedora equivalents of fengrave_packages above (best-effort mapping, not
+# verified on real hardware)
+fengrave_packages_fedora:
+  - python3-tkinter
+  - gcc-c++
+  - freetype-devel
+  - potrace
 # F-Engrave Python dependencies
 fengrave_pip_packages:
   - pyclipper
@@ -140,3 +184,8 @@ fengrave_pip_packages:
 install_kirimoto: yes
 # Release tag to download from https://github.com/GridSpace/grid-apps/releases
 kirimoto_version: "4.7.3"
+# FUSE package needed to run the AppImage on Fedora (equivalent of libfuse2 on
+# Debian/Ubuntu). Note: Fedora 44 dropped FUSE2 support entirely, so the
+# AppImage may not run there even with this installed - see README.
+kirimoto_packages_fedora:
+  - fuse-libs
