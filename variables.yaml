@@ -8,14 +8,24 @@ packages_to_install:
 ###########
 # Whether install or not Candle
 install_candle: yes
-# Branch to use when setting up Candle.
-candle_repo_branch: "grbl_1_1"
-# Candle dependencies
+# Tag to use when setting up Candle. As of Candle v11 the project switched
+# from a qmake/Qt-Widgets build to CMake, dropping the old "grbl_1_1" branch
+# (which no longer exists). See https://github.com/Denvi/Candle/releases
+candle_version: "v11.2"
+# Candle dependencies (qt5-default was removed from Debian bookworm/Ubuntu
+# 21.04+, these are the individual packages that replace it, plus the extra
+# Qt modules the CMake build now needs)
 candle_packages:
-  - g++
-  - libqt5opengl5-dev
-  - qt5-default
-  - qttools5-dev-tools
+  - cmake
+  - build-essential
+  - qtbase5-dev
+  - qt5-qmake
+  - qtchooser
+  - qttools5-dev
+  - qtscript5-dev
+  - qtmultimedia5-dev
+  - qtwebengine5-dev
+  - libqt5websockets5-dev
   - libqt5serialport5-dev
 
 ################
@@ -23,23 +33,27 @@ candle_packages:
 ################
 # Whether install or not g-code-utils
 install_gcode_utils: yes
-# Version of the tool to be used
-gcode_utils_version: "1.0.1"
+# Version of the tool to be used (release asset is now named
+# g-code-utils-assembly-<version>.jar)
+gcode_utils_version: "1.2.1"
 # Architecture to be use for downloading the openjfx binaries
 # Possible values are: aarch64, arm32, x86, x64
 openjfx_architecture: "x64"
-# Version used on for JavaFX
-openjfx_version: "17.0.2"
+# Version used on for JavaFX (latest 17 LTS patch)
+openjfx_version: "17.0.18"
 
 ###########
 # FlatCAM #
 ###########
 # Whether install or not FlatCAM
 install_flatcam: yes
+# The original jpcgt/flatcam repo is unmaintained (its own docs still target
+# Python 2.7). Active development moved to FlatCAM Evo, maintained by Marius
+# Stanciu, which is what main.yaml now clones. Requires Python 3.6+ and PyQt6.
 # Branch to use for the installation
 flatcam_repo_branch: "Beta"
-# This packages are coming directly from
-# https://bitbucket.org/jpcgt/flatcam/src/Beta/setup_ubuntu.sh
+# These packages come directly from
+# https://bitbucket.org/marius_stanciu/flatcam_beta/src/Beta/setup_ubuntu.sh
 flatcam_packages:
   - libfreetype6
   - libfreetype6-dev
@@ -50,17 +64,79 @@ flatcam_packages:
   - python3-dev
   - python3-gdal
   - python3-pip
-  - python3-pyqt5
-  - python3-pyqt5.qtopengl
+  - python3-pyqt6
+  - python3-pyqt6.qtopengl
   - python3-simplejson
   - python3-tk
+# Python (pip) dependencies, also from setup_ubuntu.sh above
+flatcam_pip_packages:
+  - numpy
+  - shapely
+  - rtree
+  - tk
+  - lxml
+  - cycler
+  - python-dateutil
+  - kiwisolver
+  - dill
+  - vispy
+  - pyopengl
+  - setuptools
+  - svg.path
+  - freetype-py
+  - fontTools
+  - rasterio
+  - ezdxf
+  - matplotlib
+  - qrcode
+  - pyqt6
+  - reportlab
+  - svglib
+  - pyserial
+  - pikepdf
+  - foronoi
+  - ortools
+  - pyqtdarktheme
+  - darkdetect
+  - svgtrace
 
 ##########################
 # Universal Gcode Sender #
 ##########################
 # Whether install or not
 install_ugs: yes
-# Version to download
-ugs_version: "2.0.9"
-# UGS type (classic, platform)
-ugs_type: platform
+# Version to download. As of 2.1.x releases ship a native, self-contained
+# .deb (bundles its own JRE, only depends on libc6) instead of a tar.gz
+# fetched from JFrog, and the old "classic" build is no longer published.
+# See https://github.com/winder/Universal-G-Code-Sender/releases
+ugs_version: "2.1.26"
+# Maps ansible_architecture to the arch suffix used in UGS release filenames
+ugs_arch_map:
+  x86_64: x64
+  aarch64: aarch64
+
+##############
+# F-Engrave  #
+##############
+# Whether install or not F-Engrave
+install_fengrave: yes
+# Version of F-Engrave to download from https://www.scorchworks.com/Fengrave/fengrave_downloads.html
+fengrave_version: "1.78"
+# F-Engrave dependencies (python3-tk for the GUI, g++/libfreetype6-dev to build
+# ttf2cxf_stream for TTF font support, potrace for PBM image import)
+fengrave_packages:
+  - python3-tk
+  - g++
+  - libfreetype6-dev
+  - potrace
+# F-Engrave Python dependencies
+fengrave_pip_packages:
+  - pyclipper
+
+##############
+# Kiri:Moto  #
+##############
+# Whether install or not Kiri:Moto
+install_kirimoto: yes
+# Release tag to download from https://github.com/GridSpace/grid-apps/releases
+kirimoto_version: "4.7.3"
